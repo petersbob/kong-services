@@ -11,7 +11,7 @@ const (
 )
 
 type repository interface {
-	GetVersionsByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error)
+	GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error)
 }
 
 type BusinessService struct {
@@ -27,6 +27,6 @@ type ServiceType struct {
 }
 
 type Service struct {
-	Type     ServiceType
-	Versions []ServiceVersion
+	ServiceType
+	VersionsInUse []uint
 }

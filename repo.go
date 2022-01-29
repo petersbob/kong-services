@@ -13,19 +13,42 @@ func NewTestingRepo() testingRepo {
 }
 
 type ServiceVersion struct {
-	Type      ServiceTypeCode
-	Version   uint
-	CreatedAt time.Time
+	ServiceType   ServiceTypeCode
+	VersionNumber uint
+	CreatedAt     time.Time
 }
 
 var currentVersionsByService = map[ServiceTypeCode][]ServiceVersion{
-	ServiceTypeCodeDatabase:           nil,
-	ServiceTypeCodeReporting:          nil,
-	ServiceTypeCodeCurrencyConversion: nil,
-	ServiceTypeCodeTranslation:        nil,
-	ServiceTypeCodeNotifications:      nil,
+	ServiceTypeCodeDatabase: {
+		{
+			ServiceType:   ServiceTypeCodeDatabase,
+			VersionNumber: 1,
+			CreatedAt:     time.Now(),
+		},
+		{
+			ServiceType:   ServiceTypeCodeDatabase,
+			VersionNumber: 3,
+			CreatedAt:     time.Now(),
+		},
+	},
+	ServiceTypeCodeReporting: nil,
+	ServiceTypeCodeCurrencyConversion: {
+		{
+			ServiceType:   ServiceTypeCodeCurrencyConversion,
+			VersionNumber: 5,
+			CreatedAt:     time.Now(),
+		},
+	},
+	ServiceTypeCodeTranslation: nil,
+	ServiceTypeCodeNotifications: {
+		{
+			ServiceType:   ServiceTypeCodeNotifications,
+			VersionNumber: 1,
+			CreatedAt:     time.Now(),
+		},
+	},
 }
 
-func (r testingRepo) GetVersionsByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
+func (r testingRepo) GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
 	return currentVersionsByService[typeCode], nil
 }

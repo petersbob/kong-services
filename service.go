@@ -49,14 +49,20 @@ func (s BusinessService) GetServices() ([]Service, error) {
 
 	for key, value := range currentServices {
 
-		versions, err := s.repo.GetVersionsByServiceType(key)
+		versionsInUse, err := s.repo.GetVersionsInUseByServiceType(key)
 		if err != nil {
 			return nil, err
 		}
 
+		versionNumbersInUse := []uint{}
+
+		for i := range versionsInUse {
+			versionNumbersInUse = append(versionNumbersInUse, versionsInUse[i].VersionNumber)
+		}
+
 		service := Service{
-			Type:     value,
-			Versions: versions,
+			ServiceType:   value,
+			VersionsInUse: versionNumbersInUse,
 		}
 
 		services = append(services, service)
