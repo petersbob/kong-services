@@ -1,20 +1,9 @@
 package main
 
-type ServiceTypeCode uint
-
-const (
-	ServiceTypeCodeDatabase           ServiceTypeCode = 1
-	ServiceTypeCodeReporting          ServiceTypeCode = 2
-	ServiceTypeCodeCurrencyConversion ServiceTypeCode = 3
-	ServiceTypeCodeTranslation        ServiceTypeCode = 4
-	ServiceTypeCodeNotifications      ServiceTypeCode = 5
-)
-
-type ServiceType struct {
-	TypeCode          ServiceTypeCode
-	Name              string
-	Description       string
-	VersionsAvailable []uint
+func New(repo repository) service {
+	return service{
+		repo: repo,
+	}
 }
 
 var currentServices = map[ServiceTypeCode]ServiceType{
@@ -52,4 +41,27 @@ var currentServices = map[ServiceTypeCode]ServiceType{
 
 func getServiceType(typeCode ServiceTypeCode) ServiceType {
 	return currentServices[typeCode]
+}
+
+func (s service) GetServices() ([]Service, error) {
+
+	services := []Service{}
+
+	for key, value := range currentServices {
+
+		versions, err := s.repo.GetVersionsByServiceType(key)
+		if err != nil {
+			return nil, err
+		}
+
+		service := Service{
+			Type:     value,
+			Versions: versions,
+		}
+
+		services = append(services, service)
+
+	}
+
+	return services, nil
 }
