@@ -20,13 +20,13 @@ type BusinessService struct {
 
 // ServiceType
 type ServiceType struct {
-	TypeCode          ServiceTypeCode
-	Name              string
-	Description       string
-	VersionsAvailable []uint
+	TypeCode          ServiceTypeCode `json:"type_code"`
+	Name              string          `json:"name"`
+	Description       string          `json:"description"`
+	VersionsAvailable []uint          `json:"versions_available"`
 }
 
 type Service struct {
 	ServiceType
-	VersionsInUse []uint
+	VersionsInUse []uint `json:"versions_in_use"`
 }
