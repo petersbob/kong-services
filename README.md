@@ -20,3 +20,9 @@ Validation of the config was done to prevent deploying the server with a missing
 Gin was chosen as the http framework since I am familiar with it and using it will speed things up.
 
 Did not let the server start if configs do not exist. The user of the server's api can't do anything about fixing missing configs, so we prevent the server from running in the the first place.
+
+# Service (business logic) layer
+
+I set up the service types as constants in code. The benefit is that any logic related to different service types will be really fast and changes to the service types can be tracked via version control.
+
+The downside of this is that it does not allow the end user of the product to create new service types since code access would be needed to create a new service type. I made the assumption that new service types are added very rarely.
