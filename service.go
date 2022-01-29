@@ -1,7 +1,7 @@
 package main
 
-func New(repo repository) service {
-	return service{
+func NewBusinessService(repo repository) BusinessService {
+	return BusinessService{
 		repo: repo,
 	}
 }
@@ -43,7 +43,7 @@ func getServiceType(typeCode ServiceTypeCode) ServiceType {
 	return currentServices[typeCode]
 }
 
-func (s service) GetServices() ([]Service, error) {
+func (s BusinessService) GetServices() ([]Service, error) {
 
 	services := []Service{}
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -13,6 +14,21 @@ import (
 
 type Config struct {
 	Port int
+}
+
+type handler struct {
+	service BusinessService
+}
+
+func (h handler) getServices(c *gin.Context) {
+
+	services, err := h.service.GetServices()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, services)
 }
 
 func main() {
@@ -27,17 +43,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	portString := strconv.FormatInt(int64(config.Port), 10)
+	repo := NewTestingRepo()
 
-	os.Setenv("PORT", portString)
+	service := NewBusinessService(repo)
+
+	h := handler{
+		service: service,
+	}
 
 	r := gin.Default()
 
-	r.GET("/greeting", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"hello": "world",
-		})
-	})
+	r.GET("/services", h.getServices)
+
+	portString := strconv.FormatInt(int64(config.Port), 10)
+
+	os.Setenv("PORT", portString)
 
 	r.Run()
 

@@ -8,6 +8,10 @@ import "time"
 type testingRepo struct {
 }
 
+func NewTestingRepo() testingRepo {
+	return testingRepo{}
+}
+
 type ServiceVersion struct {
 	Type      ServiceTypeCode
 	Version   uint

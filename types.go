@@ -14,7 +14,7 @@ type repository interface {
 	GetVersionsByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error)
 }
 
-type service struct {
+type BusinessService struct {
 	repo repository
 }
 
