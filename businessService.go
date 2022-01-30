@@ -1,7 +1,16 @@
 package main
 
+import (
+	"strconv"
+	"strings"
+)
+
 type businessService struct {
 	repo repository
+}
+
+type servicesFilter struct {
+	search string
 }
 
 func NewBusinessService(repo repository) businessService {
@@ -10,50 +19,37 @@ func NewBusinessService(repo repository) businessService {
 	}
 }
 
-// CurrentServiceTypes is a map of all of the current service types that are available to create.
-var currentServiceTypes = map[ServiceTypeCode]ServiceType{
-	ServiceTypeCodeDatabase: {
-		TypeCode:          ServiceTypeCodeDatabase,
-		Name:              "Database Service",
-		Description:       "A service for running databases",
-		VersionsAvailable: []uint{1, 2, 3},
-	},
-	ServiceTypeCodeReporting: {
-		TypeCode:          ServiceTypeCodeReporting,
-		Name:              "Reporting Service",
-		Description:       "A service for running reports",
-		VersionsAvailable: []uint{55, 7},
-	},
-	ServiceTypeCodeCurrencyConversion: {
-		TypeCode:          ServiceTypeCodeCurrencyConversion,
-		Name:              "Currency Conversion",
-		Description:       "A service for doing currency convertions",
-		VersionsAvailable: []uint{1, 2, 3, 4, 5, 6, 7, 8},
-	},
-	ServiceTypeCodeTranslation: {
-		TypeCode:          ServiceTypeCodeTranslation,
-		Name:              "Translation service",
-		Description:       "A service for doing language translations",
-		VersionsAvailable: []uint{12, 14},
-	},
-	ServiceTypeCodeNotifications: {
-		TypeCode:          ServiceTypeCodeNotifications,
-		Name:              "Notifications service",
-		Description:       "A service sending notifications",
-		VersionsAvailable: []uint{1},
-	},
-}
-
 func getServiceType(typeCode ServiceTypeCode) ServiceType {
 	return currentServiceTypes[typeCode]
 }
 
+func filterServiceTypes(filter servicesFilter) []ServiceType {
+	serviceTypes := []ServiceType{}
+
+	// filter based on search field
+	for _, value := range currentServiceTypes {
+		typeCodeString := strconv.FormatUint(uint64(value.TypeCode), 10)
+
+		if strings.Contains(value.Name, filter.search) ||
+			strings.Contains(value.Description, filter.search) ||
+			strings.Contains(typeCodeString, filter.search) {
+
+			serviceTypes = append(serviceTypes, value)
+		}
+	}
+
+	return serviceTypes
+}
+
 // GetServices find alls the current services that are in use by the user
-func (s businessService) GetServices() ([]Service, error) {
+func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
 	services := []Service{}
 
-	for key, value := range currentServiceTypes {
-		versionsInUse, err := s.repo.GetVersionsInUseByServiceType(key)
+	serviceTypes := filterServiceTypes(filter)
+
+	for i := range serviceTypes {
+
+		versionsInUse, err := s.repo.GetVersionsInUseByServiceType(serviceTypes[i].TypeCode)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +65,7 @@ func (s businessService) GetServices() ([]Service, error) {
 		}
 
 		service := Service{
-			ServiceType:   value,
+			ServiceType:   serviceTypes[i],
 			VersionsInUse: versionNumbersInUse,
 		}
 

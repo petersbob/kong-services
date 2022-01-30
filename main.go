@@ -15,7 +15,13 @@ type handler struct {
 }
 
 func (h handler) getServices(c *gin.Context) {
-	services, err := h.service.GetServices()
+	search := c.Query("search")
+
+	filter := servicesFilter{
+		search: search,
+	}
+
+	services, err := h.service.GetServices(filter)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
