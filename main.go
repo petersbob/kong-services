@@ -16,9 +16,11 @@ type handler struct {
 
 func (h handler) getServices(c *gin.Context) {
 	search := c.Query("search")
+	sort := c.Query(("sort"))
 
 	filter := servicesFilter{
 		search: search,
+		sort:   sort,
 	}
 
 	services, err := h.service.GetServices(filter)

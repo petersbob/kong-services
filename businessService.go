@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -11,6 +12,7 @@ type businessService struct {
 
 type servicesFilter struct {
 	search string
+	sort   string
 }
 
 func NewBusinessService(repo repository) businessService {
@@ -23,7 +25,7 @@ func getServiceType(typeCode ServiceTypeCode) ServiceType {
 	return currentServiceTypes[typeCode]
 }
 
-func filterBySearchValue(searchString string, servicesTypes []ServiceType) []ServiceType {
+func filterServiceTypesBySearchValue(searchString string, servicesTypes []ServiceType) []ServiceType {
 	filteredServiceTypes := []ServiceType{}
 
 	for i := range servicesTypes {
@@ -41,6 +43,21 @@ func filterBySearchValue(searchString string, servicesTypes []ServiceType) []Ser
 	return filteredServiceTypes
 }
 
+func sortServiceTypes(sortString string, serviceTypes []ServiceType) []ServiceType {
+	switch sortString {
+	case "name":
+		sort.Slice(serviceTypes, func(i, j int) bool { return serviceTypes[i].Name < serviceTypes[j].Name })
+	case "description":
+		sort.Slice(serviceTypes, func(i, j int) bool { return serviceTypes[i].Description < serviceTypes[j].Description })
+	case "typeCode":
+		fallthrough
+	default:
+		sort.Slice(serviceTypes, func(i, j int) bool { return serviceTypes[i].TypeCode < serviceTypes[j].TypeCode })
+	}
+
+	return serviceTypes
+}
+
 func filterServiceTypes(filter servicesFilter) []ServiceType {
 	serviceTypes := []ServiceType{}
 
@@ -48,7 +65,9 @@ func filterServiceTypes(filter servicesFilter) []ServiceType {
 		serviceTypes = append(serviceTypes, value)
 	}
 
-	serviceTypes = filterBySearchValue(filter.search, serviceTypes)
+	serviceTypes = filterServiceTypesBySearchValue(filter.search, serviceTypes)
+
+	serviceTypes = sortServiceTypes(filter.sort, serviceTypes)
 
 	return serviceTypes
 }
