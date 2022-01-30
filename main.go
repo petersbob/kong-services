@@ -2,26 +2,19 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/yaml.v2"
 )
 
-type Config struct {
-	Port int
-}
-
 type handler struct {
-	service BusinessService
+	service businessService
 }
 
 func (h handler) getServices(c *gin.Context) {
-
 	services, err := h.service.GetServices()
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -110,6 +103,7 @@ func (h handler) getServiceVersion(c *gin.Context) {
 	versionNumber, err := strconv.ParseUint(versionNumberString, 10, 64)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, errors.New("invalid version number"))
+		return
 	}
 
 	serviceVersions, err := h.service.GetServiceVersion(ServiceTypeCode(typeCode), uint(versionNumber))
@@ -127,7 +121,6 @@ func (h handler) getServiceVersion(c *gin.Context) {
 }
 
 func main() {
-
 	config, err := getConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -137,6 +130,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	portString := strconv.FormatInt(int64(config.Port), 10)
+	os.Setenv("PORT", portString)
 
 	repo := NewTestingRepo()
 
@@ -153,34 +149,5 @@ func main() {
 	r.GET("/services/:type_code/versions", h.getServiceVersions)
 	r.GET("/services/:type_code/versions/:version_number", h.getServiceVersion)
 
-	portString := strconv.FormatInt(int64(config.Port), 10)
-
-	os.Setenv("PORT", portString)
-
 	r.Run()
-
-}
-
-func validateConfig(config Config) error {
-	if config.Port == 0 {
-		return errors.New("missing port config value")
-	}
-
-	return nil
-}
-
-func getConfig() (Config, error) {
-	configFile, err := ioutil.ReadFile("config.yaml")
-	if err != nil {
-		return Config{}, err
-	}
-
-	config := Config{}
-
-	err = yaml.Unmarshal(configFile, &config)
-	if err != nil {
-		return Config{}, err
-	}
-
-	return config, nil
 }

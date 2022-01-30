@@ -1,11 +1,16 @@
 package main
 
-func NewBusinessService(repo repository) BusinessService {
-	return BusinessService{
+type businessService struct {
+	repo repository
+}
+
+func NewBusinessService(repo repository) businessService {
+	return businessService{
 		repo: repo,
 	}
 }
 
+// CurrentServiceTypes is a map of all of the current service types that are available to create.
 var currentServiceTypes = map[ServiceTypeCode]ServiceType{
 	ServiceTypeCodeDatabase: {
 		TypeCode:          ServiceTypeCodeDatabase,
@@ -43,16 +48,11 @@ func getServiceType(typeCode ServiceTypeCode) ServiceType {
 	return currentServiceTypes[typeCode]
 }
 
-func (s BusinessService) GetServices() ([]Service, error) {
-
+// GetServices find alls the current services that are in use by the user
+func (s businessService) GetServices() ([]Service, error) {
 	services := []Service{}
 
-	serviceTypes := currentServiceTypes
-
-	// do the filtering on the service types
-
-	for key, value := range serviceTypes {
-
+	for key, value := range currentServiceTypes {
 		versionsInUse, err := s.repo.GetVersionsInUseByServiceType(key)
 		if err != nil {
 			return nil, err
@@ -74,14 +74,13 @@ func (s BusinessService) GetServices() ([]Service, error) {
 		}
 
 		services = append(services, service)
-
 	}
 
 	return services, nil
 }
 
-func (s BusinessService) GetService(typeCode ServiceTypeCode) (Service, error) {
-
+// GetService find the details on a specific in use service
+func (s businessService) GetService(typeCode ServiceTypeCode) (Service, error) {
 	serviceType := getServiceType(typeCode)
 
 	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
@@ -107,8 +106,8 @@ func (s BusinessService) GetService(typeCode ServiceTypeCode) (Service, error) {
 	return service, nil
 }
 
-func (s BusinessService) GetServiceVersions(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
-
+// GetServiceVersions finds all of the versions of a service in use
+func (s businessService) GetServiceVersions(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
 	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
 	if err != nil {
 		return nil, err
@@ -121,7 +120,8 @@ func (s BusinessService) GetServiceVersions(typeCode ServiceTypeCode) ([]Service
 	return versionsInUse, nil
 }
 
-func (s BusinessService) GetServiceVersion(typeCode ServiceTypeCode, versionNumber uint) (ServiceVersion, error) {
+// GetServiceVersion find info on a specific verion of a service in use
+func (s businessService) GetServiceVersion(typeCode ServiceTypeCode, versionNumber uint) (ServiceVersion, error) {
 	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
 	if err != nil {
 		return ServiceVersion{}, err

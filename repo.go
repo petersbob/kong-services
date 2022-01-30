@@ -2,6 +2,10 @@ package main
 
 import "time"
 
+type repository interface {
+	GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error)
+}
+
 // TestingRepo is an implementation of the repository interface
 // but meant to only be used during testing. This should be replaced by a real
 // persistence layer later.
@@ -10,12 +14,6 @@ type testingRepo struct {
 
 func NewTestingRepo() testingRepo {
 	return testingRepo{}
-}
-
-type ServiceVersion struct {
-	ServiceType   ServiceTypeCode
-	VersionNumber uint
-	CreatedAt     time.Time
 }
 
 var currentVersionsByService = map[ServiceTypeCode][]ServiceVersion{
