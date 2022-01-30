@@ -23,20 +23,32 @@ func getServiceType(typeCode ServiceTypeCode) ServiceType {
 	return currentServiceTypes[typeCode]
 }
 
+func filterBySearchValue(searchString string, servicesTypes []ServiceType) []ServiceType {
+	filteredServiceTypes := []ServiceType{}
+
+	for i := range servicesTypes {
+		typeCodeString := strconv.FormatUint(uint64(servicesTypes[i].TypeCode), 10)
+
+		if strings.Contains(servicesTypes[i].Description, searchString) ||
+			strings.Contains(servicesTypes[i].Name, searchString) ||
+			strings.Contains(typeCodeString, searchString) {
+
+			filteredServiceTypes = append(filteredServiceTypes, servicesTypes[i])
+		}
+
+	}
+
+	return filteredServiceTypes
+}
+
 func filterServiceTypes(filter servicesFilter) []ServiceType {
 	serviceTypes := []ServiceType{}
 
-	// filter based on search field
 	for _, value := range currentServiceTypes {
-		typeCodeString := strconv.FormatUint(uint64(value.TypeCode), 10)
-
-		if strings.Contains(value.Name, filter.search) ||
-			strings.Contains(value.Description, filter.search) ||
-			strings.Contains(typeCodeString, filter.search) {
-
-			serviceTypes = append(serviceTypes, value)
-		}
+		serviceTypes = append(serviceTypes, value)
 	}
+
+	serviceTypes = filterBySearchValue(filter.search, serviceTypes)
 
 	return serviceTypes
 }
