@@ -11,8 +11,10 @@ type businessService struct {
 }
 
 type servicesFilter struct {
-	search string
-	sort   string
+	search   string
+	sort     string
+	page     int
+	pageSize int
 }
 
 func NewBusinessService(repo repository) businessService {
@@ -58,6 +60,27 @@ func sortServiceTypes(sortString string, serviceTypes []ServiceType) []ServiceTy
 	return serviceTypes
 }
 
+func getServiceTypesPage(page int, pageSize int, serviceTypes []ServiceType) []ServiceType {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 1
+	}
+
+	serviceTypesLength := len(serviceTypes)
+
+	startingIndex := (pageSize * page) - 1
+
+	serviceTypesPage := []ServiceType{}
+
+	for i := startingIndex; i < startingIndex+pageSize && i < serviceTypesLength; i++ {
+		serviceTypesPage = append(serviceTypesPage, serviceTypes[i])
+	}
+
+	return serviceTypesPage
+}
+
 func filterServiceTypes(filter servicesFilter) []ServiceType {
 	serviceTypes := []ServiceType{}
 
@@ -68,6 +91,8 @@ func filterServiceTypes(filter servicesFilter) []ServiceType {
 	serviceTypes = filterServiceTypesBySearchValue(filter.search, serviceTypes)
 
 	serviceTypes = sortServiceTypes(filter.sort, serviceTypes)
+
+	serviceTypes = getServiceTypesPage(filter.page, filter.pageSize, serviceTypes)
 
 	return serviceTypes
 }

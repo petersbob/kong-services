@@ -18,9 +18,27 @@ func (h handler) getServices(c *gin.Context) {
 	search := c.Query("search")
 	sort := c.Query(("sort"))
 
+	pageString := c.Query("page")
+
+	page, err := strconv.ParseInt(pageString, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid page"))
+		return
+	}
+
+	pageSizeString := c.Query("pageSize")
+
+	pageSize, err := strconv.ParseInt(pageSizeString, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid page size"))
+		return
+	}
+
 	filter := servicesFilter{
-		search: search,
-		sort:   sort,
+		search:   search,
+		sort:     sort,
+		page:     int(page),
+		pageSize: int(pageSize),
 	}
 
 	services, err := h.service.GetServices(filter)
