@@ -71,3 +71,51 @@ func (s BusinessService) GetServices() ([]Service, error) {
 
 	return services, nil
 }
+
+func (s BusinessService) GetService(typeCode ServiceTypeCode) (Service, error) {
+
+	serviceType := getServiceType(typeCode)
+
+	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
+	if err != nil {
+		return Service{}, err
+	}
+
+	versionNumbersInUse := []uint{}
+
+	for i := range versionsInUse {
+		versionNumbersInUse = append(versionNumbersInUse, versionsInUse[i].VersionNumber)
+	}
+
+	service := Service{
+		ServiceType:   serviceType,
+		VersionsInUse: versionNumbersInUse,
+	}
+
+	return service, nil
+}
+
+func (s BusinessService) GetServiceVersions(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
+
+	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
+	if err != nil {
+		return nil, err
+	}
+
+	return versionsInUse, nil
+}
+
+func (s BusinessService) GetServiceVersion(typeCode ServiceTypeCode, versionNumber uint) (ServiceVersion, error) {
+	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
+	if err != nil {
+		return ServiceVersion{}, err
+	}
+
+	for i := range versionsInUse {
+		if versionsInUse[i].VersionNumber == versionNumber {
+			return versionsInUse[i], nil
+		}
+	}
+
+	return ServiceVersion{}, nil
+}

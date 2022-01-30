@@ -31,6 +31,90 @@ func (h handler) getServices(c *gin.Context) {
 	c.JSON(http.StatusOK, services)
 }
 
+func (h handler) getService(c *gin.Context) {
+	typeCodeString := c.Param("type_code")
+
+	if typeCodeString == "" {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid type code"))
+		return
+	}
+
+	typeCode, err := strconv.ParseUint(typeCodeString, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid type code"))
+		return
+	}
+
+	service, err := h.service.GetService(ServiceTypeCode(typeCode))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, service)
+}
+
+func (h handler) getServiceVersions(c *gin.Context) {
+	typeCodeString := c.Param("type_code")
+
+	if typeCodeString == "" {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid type code"))
+		return
+	}
+
+	typeCode, err := strconv.ParseUint(typeCodeString, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid type code"))
+		return
+	}
+
+	serviceVersions, err := h.service.GetServiceVersions(ServiceTypeCode(typeCode))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, serviceVersions)
+}
+
+func (h handler) getServiceVersion(c *gin.Context) {
+	typeCodeString := c.Param("type_code")
+
+	if typeCodeString == "" {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid type code"))
+		return
+	}
+
+	typeCode, err := strconv.ParseUint(typeCodeString, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid type code"))
+		return
+	}
+
+	versionNumberString := c.Param("version_number")
+	if versionNumberString == "" {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid version number"))
+		return
+	}
+
+	versionNumber, err := strconv.ParseUint(versionNumberString, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("invalid version number"))
+	}
+
+	serviceVersions, err := h.service.GetServiceVersion(ServiceTypeCode(typeCode), uint(versionNumber))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	if (serviceVersions == ServiceVersion{}) {
+		c.AbortWithError(http.StatusNotFound, errors.New("service version not found"))
+	}
+
+	c.JSON(http.StatusOK, serviceVersions)
+}
+
 func main() {
 
 	config, err := getConfig()
@@ -54,6 +138,9 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/services", h.getServices)
+	r.GET("/services/:type_code", h.getService)
+	r.GET("/services/:type_code/versions", h.getServiceVersions)
+	r.GET("/services/:type_code/versions/:version_number", h.getServiceVersion)
 
 	portString := strconv.FormatInt(int64(config.Port), 10)
 
