@@ -1,5 +1,7 @@
 package main
 
+import "errors"
+
 type ServiceTypeCode uint
 
 const (
@@ -30,3 +32,7 @@ type Service struct {
 	ServiceType
 	VersionsInUse []uint `json:"versions_in_use"`
 }
+
+var (
+	errorNotFound = errors.New("not found")
+)

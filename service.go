@@ -6,7 +6,7 @@ func NewBusinessService(repo repository) BusinessService {
 	}
 }
 
-var currentServices = map[ServiceTypeCode]ServiceType{
+var currentServiceTypes = map[ServiceTypeCode]ServiceType{
 	ServiceTypeCodeDatabase: {
 		TypeCode:          ServiceTypeCodeDatabase,
 		Name:              "Database Service",
@@ -40,18 +40,26 @@ var currentServices = map[ServiceTypeCode]ServiceType{
 }
 
 func getServiceType(typeCode ServiceTypeCode) ServiceType {
-	return currentServices[typeCode]
+	return currentServiceTypes[typeCode]
 }
 
 func (s BusinessService) GetServices() ([]Service, error) {
 
 	services := []Service{}
 
-	for key, value := range currentServices {
+	serviceTypes := currentServiceTypes
+
+	// do the filtering on the service types
+
+	for key, value := range serviceTypes {
 
 		versionsInUse, err := s.repo.GetVersionsInUseByServiceType(key)
 		if err != nil {
 			return nil, err
+		}
+
+		if len(versionsInUse) == 0 {
+			continue
 		}
 
 		versionNumbersInUse := []uint{}
@@ -81,6 +89,10 @@ func (s BusinessService) GetService(typeCode ServiceTypeCode) (Service, error) {
 		return Service{}, err
 	}
 
+	if len(versionsInUse) == 0 {
+		return Service{}, errorNotFound
+	}
+
 	versionNumbersInUse := []uint{}
 
 	for i := range versionsInUse {
@@ -102,6 +114,10 @@ func (s BusinessService) GetServiceVersions(typeCode ServiceTypeCode) ([]Service
 		return nil, err
 	}
 
+	if len(versionsInUse) == 0 {
+		return nil, errorNotFound
+	}
+
 	return versionsInUse, nil
 }
 
@@ -117,5 +133,5 @@ func (s BusinessService) GetServiceVersion(typeCode ServiceTypeCode, versionNumb
 		}
 	}
 
-	return ServiceVersion{}, nil
+	return ServiceVersion{}, errorNotFound
 }

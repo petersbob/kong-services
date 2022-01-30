@@ -47,6 +47,11 @@ func (h handler) getService(c *gin.Context) {
 
 	service, err := h.service.GetService(ServiceTypeCode(typeCode))
 	if err != nil {
+		if err == errorNotFound {
+			c.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -70,6 +75,11 @@ func (h handler) getServiceVersions(c *gin.Context) {
 
 	serviceVersions, err := h.service.GetServiceVersions(ServiceTypeCode(typeCode))
 	if err != nil {
+		if err == errorNotFound {
+			c.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -104,12 +114,13 @@ func (h handler) getServiceVersion(c *gin.Context) {
 
 	serviceVersions, err := h.service.GetServiceVersion(ServiceTypeCode(typeCode), uint(versionNumber))
 	if err != nil {
+		if err == errorNotFound {
+			c.AbortWithError(http.StatusNotFound, errors.New("service version not found"))
+			return
+		}
+
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
-	}
-
-	if (serviceVersions == ServiceVersion{}) {
-		c.AbortWithError(http.StatusNotFound, errors.New("service version not found"))
 	}
 
 	c.JSON(http.StatusOK, serviceVersions)
