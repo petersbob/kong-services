@@ -5,6 +5,13 @@
 3. run `go run main.go`
 
 
+## Endpoints
+
+- `/services`: Returns a list of all the services available.
+- `/services/:type_code`: Returns info about a specific service type.
+- `/services/:type_code/versions`: Returns info about the currently in use versions of a specific service.
+- `/services/:type_code/versions/:version_number`: Returns info about a specific in use version of a service.
+
 # Design Decisions
 
 Kept the whole project in one package to keep things simple. I may change this as it gets more complicated.
