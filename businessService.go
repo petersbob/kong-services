@@ -81,27 +81,8 @@ func getServiceTypesPage(page int, pageSize int, serviceTypes []ServiceType) []S
 	return serviceTypesPage
 }
 
-func filterServiceTypes(filter servicesFilter) []ServiceType {
-	serviceTypes := []ServiceType{}
-
-	for _, value := range currentServiceTypes {
-		serviceTypes = append(serviceTypes, value)
-	}
-
-	serviceTypes = filterServiceTypesBySearchValue(filter.search, serviceTypes)
-
-	serviceTypes = sortServiceTypes(filter.sort, serviceTypes)
-
-	serviceTypes = getServiceTypesPage(filter.page, filter.pageSize, serviceTypes)
-
-	return serviceTypes
-}
-
-// GetServices find alls the current services that are in use by the user
-func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
-	services := []Service{}
-
-	serviceTypes := filterServiceTypes(filter)
+func (s businessService) getInUseServices(serviceTypes []ServiceType) ([]Service, error) {
+	inUseServices := []Service{}
 
 	for i := range serviceTypes {
 
@@ -125,10 +106,33 @@ func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
 			VersionsInUse: versionNumbersInUse,
 		}
 
-		services = append(services, service)
+		inUseServices = append(inUseServices, service)
 	}
 
-	return services, nil
+	return inUseServices, nil
+}
+
+// GetServices find alls the current services that are in use by the user
+func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
+
+	serviceTypes := []ServiceType{}
+
+	for _, value := range currentServiceTypes {
+		serviceTypes = append(serviceTypes, value)
+	}
+
+	serviceTypes = filterServiceTypesBySearchValue(filter.search, serviceTypes)
+
+	serviceTypes = sortServiceTypes(filter.sort, serviceTypes)
+
+	serviceTypes = getServiceTypesPage(filter.page, filter.pageSize, serviceTypes)
+
+	getInUseServices, err := s.getInUseServices(serviceTypes)
+	if err != nil {
+		return nil, err
+	}
+
+	return getInUseServices, nil
 }
 
 // GetService find the details on a specific in use service
