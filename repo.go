@@ -11,7 +11,7 @@ import (
 )
 
 type repository interface {
-	GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error)
+	GetVersionsInstalledByServiceType(typeCode ServiceTypeCode) ([]InstalledServiceVersion, error)
 }
 
 // TestingRepo is an implementation of the repository interface
@@ -57,7 +57,7 @@ func NewPostgresRepo(databaseURL, migrationsPath string) (postgresRepo, error) {
 
 }
 
-var currentVersionsByService = map[ServiceTypeCode][]ServiceVersion{
+var currentVersionsByService = map[ServiceTypeCode][]InstalledServiceVersion{
 	ServiceTypeCodeDatabase: {
 		{
 			ServiceType:   ServiceTypeCodeDatabase,
@@ -88,10 +88,10 @@ var currentVersionsByService = map[ServiceTypeCode][]ServiceVersion{
 	},
 }
 
-func (r testingRepo) GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
+func (r testingRepo) GetVersionsInstalledByServiceType(typeCode ServiceTypeCode) ([]InstalledServiceVersion, error) {
 	return currentVersionsByService[typeCode], nil
 }
 
-func (r postgresRepo) GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
+func (r postgresRepo) GetVersionsInstalledByServiceType(typeCode ServiceTypeCode) ([]InstalledServiceVersion, error) {
 	return currentVersionsByService[typeCode], nil
 }

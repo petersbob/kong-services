@@ -68,7 +68,7 @@ type ServiceType struct {
 }
 
 // ServiceType describes a specific version of a ServiceType a user has deployed
-type ServiceVersion struct {
+type InstalledServiceVersion struct {
 	ServiceType   ServiceTypeCode
 	VersionNumber uint
 	CreatedAt     time.Time

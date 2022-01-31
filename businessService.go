@@ -96,7 +96,7 @@ func (s businessService) getInUseServices(serviceTypes []ServiceType) ([]Service
 
 	for i := range serviceTypes {
 
-		versionsInUse, err := s.repo.GetVersionsInUseByServiceType(serviceTypes[i].TypeCode)
+		versionsInUse, err := s.repo.GetVersionsInstalledByServiceType(serviceTypes[i].TypeCode)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +152,7 @@ func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
 func (s businessService) GetService(typeCode ServiceTypeCode) (Service, error) {
 	serviceType := getServiceType(typeCode)
 
-	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
+	versionsInUse, err := s.repo.GetVersionsInstalledByServiceType(typeCode)
 	if err != nil {
 		return Service{}, err
 	}
@@ -176,8 +176,8 @@ func (s businessService) GetService(typeCode ServiceTypeCode) (Service, error) {
 }
 
 // GetServiceVersions finds all of the versions of a service in use
-func (s businessService) GetServiceVersions(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
-	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
+func (s businessService) GetServiceVersions(typeCode ServiceTypeCode) ([]InstalledServiceVersion, error) {
+	versionsInUse, err := s.repo.GetVersionsInstalledByServiceType(typeCode)
 	if err != nil {
 		return nil, err
 	}
@@ -190,10 +190,10 @@ func (s businessService) GetServiceVersions(typeCode ServiceTypeCode) ([]Service
 }
 
 // GetServiceVersion find info on a specific verion of a service in use
-func (s businessService) GetServiceVersion(typeCode ServiceTypeCode, versionNumber uint) (ServiceVersion, error) {
-	versionsInUse, err := s.repo.GetVersionsInUseByServiceType(typeCode)
+func (s businessService) GetServiceVersion(typeCode ServiceTypeCode, versionNumber uint) (InstalledServiceVersion, error) {
+	versionsInUse, err := s.repo.GetVersionsInstalledByServiceType(typeCode)
 	if err != nil {
-		return ServiceVersion{}, err
+		return InstalledServiceVersion{}, err
 	}
 
 	for i := range versionsInUse {
@@ -202,5 +202,5 @@ func (s businessService) GetServiceVersion(typeCode ServiceTypeCode, versionNumb
 		}
 	}
 
-	return ServiceVersion{}, errorNotFound
+	return InstalledServiceVersion{}, errorNotFound
 }
