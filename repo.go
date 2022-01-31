@@ -93,5 +93,38 @@ func (r testingRepo) GetVersionsInstalledByServiceType(typeCode ServiceTypeCode)
 }
 
 func (r postgresRepo) GetVersionsInstalledByServiceType(typeCode ServiceTypeCode) ([]InstalledServiceVersion, error) {
-	return currentVersionsByService[typeCode], nil
+	installedServiceVersions := []InstalledServiceVersion{}
+
+	selectInstalledServiceVersions := `
+		SELECT
+			created_at,
+			service_type,
+			version_number
+		FROM
+			installed_service_versions
+		WHERE
+			service_type = $1
+	`
+
+	rows, err := r.db.Query(selectInstalledServiceVersions, typeCode)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		installedServiceVersion := InstalledServiceVersion{}
+		err := rows.Scan(
+			&installedServiceVersion.CreatedAt,
+			&installedServiceVersion.ServiceType,
+			&installedServiceVersion.VersionNumber,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		installedServiceVersions = append(installedServiceVersions, installedServiceVersion)
+	}
+
+	return installedServiceVersions, nil
 }
