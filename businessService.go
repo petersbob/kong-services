@@ -27,6 +27,8 @@ func getServiceType(typeCode ServiceTypeCode) ServiceType {
 	return currentServiceTypes[typeCode]
 }
 
+// filterServiceTypesBySearchValue filters the service types by trying to find the substring "searchString"
+// in their description, name, or type code.
 func filterServiceTypesBySearchValue(searchString string, servicesTypes []ServiceType) []ServiceType {
 	filteredServiceTypes := []ServiceType{}
 
@@ -45,6 +47,8 @@ func filterServiceTypesBySearchValue(searchString string, servicesTypes []Servic
 	return filteredServiceTypes
 }
 
+// sortServiceTypes sorts a list of service types by name, description, or type code.
+// If no sort string is provided or is unrecognized, the service types are sorted by type code.
 func sortServiceTypes(sortString string, serviceTypes []ServiceType) []ServiceType {
 	switch sortString {
 	case "name":
@@ -60,7 +64,10 @@ func sortServiceTypes(sortString string, serviceTypes []ServiceType) []ServiceTy
 	return serviceTypes
 }
 
-func getServiceTypesPage(page int, pageSize int, serviceTypes []ServiceType) []ServiceType {
+// getServicesPage finds a subset of services in a list of services given a page and the number of
+// services on each page. If a page size of page is less than one, both default to 1. If the page number
+// is provided is too large, an empty set of services is returned.
+func getServicesPage(page int, pageSize int, services []Service) []Service {
 	if page < 1 {
 		page = 1
 	}
@@ -68,19 +75,22 @@ func getServiceTypesPage(page int, pageSize int, serviceTypes []ServiceType) []S
 		pageSize = 1
 	}
 
-	serviceTypesLength := len(serviceTypes)
+	servicesLength := len(services)
 
 	startingIndex := (pageSize * page) - 1
 
-	serviceTypesPage := []ServiceType{}
+	servicesPage := []Service{}
 
-	for i := startingIndex; i < startingIndex+pageSize && i < serviceTypesLength; i++ {
-		serviceTypesPage = append(serviceTypesPage, serviceTypes[i])
+	for i := startingIndex; i < startingIndex+pageSize && i < servicesLength; i++ {
+		servicesPage = append(servicesPage, services[i])
 	}
 
-	return serviceTypesPage
+	return servicesPage
 }
 
+// getInUseServices receives a list of service types and returns a list of services that are both
+// of types included in the service types list and also in use by the user. "in use" is defined
+// as the user currently having a version of the service type installed.
 func (s businessService) getInUseServices(serviceTypes []ServiceType) ([]Service, error) {
 	inUseServices := []Service{}
 
@@ -114,25 +124,28 @@ func (s businessService) getInUseServices(serviceTypes []ServiceType) ([]Service
 
 // GetServices find alls the current services that are in use by the user
 func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
-
+	// create any array of the current service types
 	serviceTypes := []ServiceType{}
-
 	for _, value := range currentServiceTypes {
 		serviceTypes = append(serviceTypes, value)
 	}
 
-	serviceTypes = filterServiceTypesBySearchValue(filter.search, serviceTypes)
+	// filter the service types by search query
+	searchFilteredServiceTypes := filterServiceTypesBySearchValue(filter.search, serviceTypes)
 
-	serviceTypes = sortServiceTypes(filter.sort, serviceTypes)
+	// sort the service types
+	sortedServiceTypes := sortServiceTypes(filter.sort, searchFilteredServiceTypes)
 
-	serviceTypes = getServiceTypesPage(filter.page, filter.pageSize, serviceTypes)
-
-	getInUseServices, err := s.getInUseServices(serviceTypes)
+	// get a list of only the in use services (all service types where the user has a version installed)
+	inUseServices, err := s.getInUseServices(sortedServiceTypes)
 	if err != nil {
 		return nil, err
 	}
 
-	return getInUseServices, nil
+	// get the subpage of the results
+	servicesPage := getServicesPage(filter.page, filter.pageSize, inUseServices)
+
+	return servicesPage, nil
 }
 
 // GetService find the details on a specific in use service
