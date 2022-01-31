@@ -20,24 +20,33 @@ func (h handler) getServices(c *gin.Context) {
 
 	pageString := c.Query("page")
 
-	page, err := strconv.ParseInt(pageString, 10, 64)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("invalid page"))
-		return
+	page := 0
+	if pageString != "" {
+		pageInt64, err := strconv.ParseInt(pageString, 10, 64)
+		page = int(pageInt64)
+
+		if err != nil {
+			c.AbortWithError(http.StatusBadRequest, errors.New("invalid page"))
+			return
+		}
 	}
 
-	pageSizeString := c.Query("pageSize")
+	pageSizeString := c.Query("pagesize")
 
-	pageSize, err := strconv.ParseInt(pageSizeString, 10, 64)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("invalid page size"))
-		return
+	pageSize := 0
+	if pageSizeString != "" {
+		pageSizeInt64, err := strconv.ParseInt(pageSizeString, 10, 64)
+		pageSize = int(pageSizeInt64)
+		if err != nil {
+			c.AbortWithError(http.StatusBadRequest, errors.New("invalid page size"))
+			return
+		}
 	}
 
 	filter := servicesFilter{
 		search:   search,
 		sort:     sort,
-		page:     int(page),
+		page:     page,
 		pageSize: int(pageSize),
 	}
 

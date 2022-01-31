@@ -65,14 +65,14 @@ func sortServiceTypes(sortString string, serviceTypes []ServiceType) []ServiceTy
 }
 
 // getServicesPage finds a subset of services in a list of services given a page and the number of
-// services on each page. If a page size of page is less than one, both default to 1. If the page number
-// is provided is too large, an empty set of services is returned.
+// services on each page. If the page is less than 1, it defaults to 1. If page size is less than
+// 1, all the services are returned.
 func getServicesPage(page int, pageSize int, services []Service) []Service {
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 1 {
-		pageSize = 1
+		return services
 	}
 
 	servicesLength := len(services)
