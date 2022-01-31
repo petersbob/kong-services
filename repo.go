@@ -47,7 +47,7 @@ func NewPostgresRepo(databaseURL, migrationsPath string) (postgresRepo, error) {
 		return postgresRepo{}, err
 	}
 	err = m.Up()
-	if err != nil {
+	if err != nil && err != migrate.ErrNoChange {
 		return postgresRepo{}, err
 	}
 
