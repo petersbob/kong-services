@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
 	"time"
 )
@@ -51,9 +52,9 @@ var currentServiceTypes = map[ServiceTypeCode]ServiceType{
 }
 
 // errorNotFound is a general purpose error for missing resources
-var errorNotFound = errors.New("not found")
+var ErrorNotFound = errors.New("not found")
 
-// Service an implementation of a ServiceType
+// Service is a grouping of implementations of a ServiceType
 type Service struct {
 	ServiceType
 	VersionsInUse []uint `json:"versions_in_use"`
@@ -67,9 +68,37 @@ type ServiceType struct {
 	VersionsAvailable []uint          `json:"versions_available"`
 }
 
-// ServiceType describes a specific version of a ServiceType a user has deployed
+// InstalledServiceVersion describes a specific version of a ServiceType a user has installed currently
 type InstalledServiceVersion struct {
 	ServiceType   ServiceTypeCode
 	VersionNumber uint
 	CreatedAt     time.Time
+}
+
+// ServicesFilter is the set of options for filtering the services results
+type ServicesFilter struct {
+	Search   string
+	Sort     string
+	Page     int
+	PageSize int
+}
+
+// handler represents the http layer
+type handler struct {
+	service businessService
+}
+
+// businessService represents the business logic layer
+type businessService struct {
+	repo repository
+}
+
+// repository is an interface to the persistency layer that holds a record of that service versions have been installed
+type repository interface {
+	GetVersionsInstalledByServiceType(typeCode ServiceTypeCode) ([]InstalledServiceVersion, error)
+}
+
+// postgresRepo is a postgreSQL implentation of the repository interface
+type postgresRepo struct {
+	db *sql.DB
 }

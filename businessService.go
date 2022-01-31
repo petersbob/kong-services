@@ -6,17 +6,6 @@ import (
 	"strings"
 )
 
-type businessService struct {
-	repo repository
-}
-
-type servicesFilter struct {
-	search   string
-	sort     string
-	page     int
-	pageSize int
-}
-
 func NewBusinessService(repo repository) businessService {
 	return businessService{
 		repo: repo,
@@ -123,7 +112,7 @@ func (s businessService) getInUseServices(serviceTypes []ServiceType) ([]Service
 }
 
 // GetServices find alls the current services that are in use by the user
-func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
+func (s businessService) GetServices(filter ServicesFilter) ([]Service, error) {
 	// create any array of the current service types
 	serviceTypes := []ServiceType{}
 	for _, value := range currentServiceTypes {
@@ -131,10 +120,10 @@ func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
 	}
 
 	// filter the service types by search query
-	searchFilteredServiceTypes := filterServiceTypesBySearchValue(filter.search, serviceTypes)
+	searchFilteredServiceTypes := filterServiceTypesBySearchValue(filter.Search, serviceTypes)
 
 	// sort the service types
-	sortedServiceTypes := sortServiceTypes(filter.sort, searchFilteredServiceTypes)
+	sortedServiceTypes := sortServiceTypes(filter.Sort, searchFilteredServiceTypes)
 
 	// get a list of only the in use services (all service types where the user has a version installed)
 	inUseServices, err := s.getInUseServices(sortedServiceTypes)
@@ -143,7 +132,7 @@ func (s businessService) GetServices(filter servicesFilter) ([]Service, error) {
 	}
 
 	// get the subpage of the results
-	servicesPage := getServicesPage(filter.page, filter.pageSize, inUseServices)
+	servicesPage := getServicesPage(filter.Page, filter.PageSize, inUseServices)
 
 	return servicesPage, nil
 }
@@ -158,7 +147,7 @@ func (s businessService) GetService(typeCode ServiceTypeCode) (Service, error) {
 	}
 
 	if len(versionsInUse) == 0 {
-		return Service{}, errorNotFound
+		return Service{}, ErrorNotFound
 	}
 
 	versionNumbersInUse := []uint{}
@@ -183,7 +172,7 @@ func (s businessService) GetServiceVersions(typeCode ServiceTypeCode) ([]Install
 	}
 
 	if len(versionsInUse) == 0 {
-		return nil, errorNotFound
+		return nil, ErrorNotFound
 	}
 
 	return versionsInUse, nil
@@ -202,5 +191,5 @@ func (s businessService) GetServiceVersion(typeCode ServiceTypeCode, versionNumb
 		}
 	}
 
-	return InstalledServiceVersion{}, errorNotFound
+	return InstalledServiceVersion{}, ErrorNotFound
 }

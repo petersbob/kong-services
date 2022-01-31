@@ -10,10 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type handler struct {
-	service businessService
-}
-
 func (h handler) getServices(c *gin.Context) {
 	search := c.Query("search")
 	sort := c.Query(("sort"))
@@ -43,11 +39,11 @@ func (h handler) getServices(c *gin.Context) {
 		}
 	}
 
-	filter := servicesFilter{
-		search:   search,
-		sort:     sort,
-		page:     page,
-		pageSize: int(pageSize),
+	filter := ServicesFilter{
+		Search:   search,
+		Sort:     sort,
+		Page:     page,
+		PageSize: pageSize,
 	}
 
 	services, err := h.service.GetServices(filter)
@@ -75,7 +71,7 @@ func (h handler) getService(c *gin.Context) {
 
 	service, err := h.service.GetService(ServiceTypeCode(typeCode))
 	if err != nil {
-		if err == errorNotFound {
+		if err == ErrorNotFound {
 			c.AbortWithError(http.StatusNotFound, err)
 			return
 		}
@@ -103,7 +99,7 @@ func (h handler) getServiceVersions(c *gin.Context) {
 
 	serviceVersions, err := h.service.GetServiceVersions(ServiceTypeCode(typeCode))
 	if err != nil {
-		if err == errorNotFound {
+		if err == ErrorNotFound {
 			c.AbortWithError(http.StatusNotFound, err)
 			return
 		}
@@ -143,7 +139,7 @@ func (h handler) getServiceVersion(c *gin.Context) {
 
 	serviceVersions, err := h.service.GetServiceVersion(ServiceTypeCode(typeCode), uint(versionNumber))
 	if err != nil {
-		if err == errorNotFound {
+		if err == ErrorNotFound {
 			c.AbortWithError(http.StatusNotFound, errors.New("service version not found"))
 			return
 		}

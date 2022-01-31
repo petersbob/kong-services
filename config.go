@@ -8,13 +8,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type config struct {
+type Config struct {
 	Port           int    `yaml:"port"`
 	DatabaseURL    string `yaml:"databaseurl"`
 	MigrationsPath string `yaml:"migrationspath"`
 }
 
-func validateConfig(config config) error {
+func validateConfig(config Config) error {
 	if config.Port == 0 {
 		return errors.New("missing port config value")
 	}
@@ -30,17 +30,17 @@ func validateConfig(config config) error {
 	return nil
 }
 
-func getConfig() (config, error) {
+func getConfig() (Config, error) {
 	configFile, err := ioutil.ReadFile("config.yaml")
 	if err != nil {
-		return config{}, err
+		return Config{}, err
 	}
 
-	currentConfig := config{}
+	currentConfig := Config{}
 
 	err = yaml.Unmarshal(configFile, &currentConfig)
 	if err != nil {
-		return config{}, err
+		return Config{}, err
 	}
 
 	return currentConfig, nil
