@@ -1,1 +1,2 @@
 port: 5000
+databaseurl: "postgres://user:password@host:port/database-name"

@@ -3,17 +3,23 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
 
 type config struct {
-	Port int
+	Port        int    `yaml:"port"`
+	DatabaseURL string `yaml:"databaseurl"`
 }
 
 func validateConfig(config config) error {
 	if config.Port == 0 {
 		return errors.New("missing port config value")
+	}
+
+	if strings.TrimSpace(config.DatabaseURL) == "" {
+		return errors.New("missing database url config value")
 	}
 
 	return nil

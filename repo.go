@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type repository interface {
 	GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error)
@@ -12,8 +15,29 @@ type repository interface {
 type testingRepo struct {
 }
 
+type postgresRepo struct {
+	db *sql.DB
+}
+
 func NewTestingRepo() testingRepo {
 	return testingRepo{}
+}
+
+func NewPostgresRepo(databaseURL string) (postgresRepo, error) {
+	db, err := sql.Open("postgres", databaseURL)
+	if err != nil {
+		return postgresRepo{}, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return postgresRepo{}, err
+	}
+
+	return postgresRepo{
+		db: db,
+	}, nil
+
 }
 
 var currentVersionsByService = map[ServiceTypeCode][]ServiceVersion{
@@ -48,5 +72,9 @@ var currentVersionsByService = map[ServiceTypeCode][]ServiceVersion{
 }
 
 func (r testingRepo) GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
+	return currentVersionsByService[typeCode], nil
+}
+
+func (r postgresRepo) GetVersionsInUseByServiceType(typeCode ServiceTypeCode) ([]ServiceVersion, error) {
 	return currentVersionsByService[typeCode], nil
 }

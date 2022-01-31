@@ -160,7 +160,10 @@ func main() {
 	portString := strconv.FormatInt(int64(config.Port), 10)
 	os.Setenv("PORT", portString)
 
-	repo := NewTestingRepo()
+	repo, err := NewPostgresRepo(config.DatabaseURL)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	service := NewBusinessService(repo)
 
