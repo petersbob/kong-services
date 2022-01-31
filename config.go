@@ -9,8 +9,9 @@ import (
 )
 
 type config struct {
-	Port        int    `yaml:"port"`
-	DatabaseURL string `yaml:"databaseurl"`
+	Port           int    `yaml:"port"`
+	DatabaseURL    string `yaml:"databaseurl"`
+	MigrationsPath string `yaml:"migrationspath"`
 }
 
 func validateConfig(config config) error {
@@ -20,6 +21,10 @@ func validateConfig(config config) error {
 
 	if strings.TrimSpace(config.DatabaseURL) == "" {
 		return errors.New("missing database url config value")
+	}
+
+	if strings.TrimSpace(config.MigrationsPath) == "" {
+		return errors.New("missing migrations path config value")
 	}
 
 	return nil

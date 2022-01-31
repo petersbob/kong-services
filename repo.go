@@ -3,6 +3,11 @@ package main
 import (
 	"database/sql"
 	"time"
+
+	migrate "github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
 )
 
 type repository interface {
@@ -23,13 +28,25 @@ func NewTestingRepo() testingRepo {
 	return testingRepo{}
 }
 
-func NewPostgresRepo(databaseURL string) (postgresRepo, error) {
+func NewPostgresRepo(databaseURL, migrationsPath string) (postgresRepo, error) {
 	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {
 		return postgresRepo{}, err
 	}
 
 	err = db.Ping()
+	if err != nil {
+		return postgresRepo{}, err
+	}
+
+	m, err := migrate.New(
+		migrationsPath,
+		databaseURL,
+	)
+	if err != nil {
+		return postgresRepo{}, err
+	}
+	err = m.Up()
 	if err != nil {
 		return postgresRepo{}, err
 	}

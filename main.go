@@ -160,7 +160,7 @@ func main() {
 	portString := strconv.FormatInt(int64(config.Port), 10)
 	os.Setenv("PORT", portString)
 
-	repo, err := NewPostgresRepo(config.DatabaseURL)
+	repo, err := NewPostgresRepo(config.DatabaseURL, config.MigrationsPath)
 	if err != nil {
 		log.Fatal(err)
 	}
