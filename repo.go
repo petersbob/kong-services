@@ -9,14 +9,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type repository interface {
-	GetVersionsInstalledByServiceType(typeCode ServiceTypeCode) ([]InstalledServiceVersion, error)
-}
-
-type postgresRepo struct {
-	db *sql.DB
-}
-
 func NewPostgresRepo(databaseURL, migrationsPath string) (postgresRepo, error) {
 	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {
