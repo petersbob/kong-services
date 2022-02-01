@@ -6,6 +6,8 @@
 4. Migration files are by default in the `migrations` folder but can be changed in the config.
 4. Run `go run *.go`
 
+If you want test data to be populated in the db, you can uncomment like 37 in `repo.go` which will generate test data on server start.
+
 
 # Endpoints
 

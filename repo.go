@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"math/rand"
+	"time"
 
 	migrate "github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -32,10 +34,41 @@ func NewPostgresRepo(databaseURL, migrationsPath string) (postgresRepo, error) {
 		return postgresRepo{}, err
 	}
 
+	//generateTestData(db)
+
 	return postgresRepo{
 		db: db,
 	}, nil
 
+}
+
+// generateTestData generates some random data.
+func generateTestData(db *sql.DB) error {
+	insertStatement := `
+		INSERT INTO installed_service_versions
+			(created_at, updated_at, service_type, version_number)
+		VALUES
+			(NOW(), NOW(), $1, $2)
+	`
+
+	for key, value := range currentServiceTypes {
+
+		for i := 0; i < len(value.VersionsAvailable) && i < 3; i++ {
+			s1 := rand.NewSource(time.Now().UnixNano())
+			r1 := rand.New(s1)
+			if r1.Intn(2) < 1 {
+				continue
+			}
+
+			_, err := db.Exec(insertStatement, key, value.VersionsAvailable[i])
+			if err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
 }
 
 func (r postgresRepo) GetVersionsInstalledByServiceType(typeCode ServiceTypeCode) ([]InstalledServiceVersion, error) {
